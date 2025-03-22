@@ -16,17 +16,21 @@ $timerId = $_GET['id'] ?? null;
 $userId = $session->getUserId();
 
 if ($timerId && $timer->isOwner($timerId, $userId)) {
-    $timerData = $timer->getTimersByUserId($userId);
-    $status = $timerData[0]['status'];
+    // Use a function that fetches a specific timer for this user.
+    $timerData = $timer->getTimerById($timerId, $userId);
+    $status = $timerData['status'];
+
     if ($status === 'active') {
         if ($timer->pauseTimer($timerId)) {
-            echo json_encode(['success' => true, 'status' => 'paused', 'remaining_time' => $timerData[0]['remaining_time']]);
+            $timerData = $timer->getTimerById($timerId, $userId);
+            echo json_encode(['success' => true, 'status' => 'paused', 'timer' => $timerData]);
         } else {
             echo json_encode(['success' => false, 'error' => $timer->getError()]);
         }
     } elseif ($status === 'paused') {
         if ($timer->resumeTimer($timerId)) {
-            echo json_encode(['success' => true, 'status' => 'active', 'length' => $timerData[0]['length']]);
+            $timerData = $timer->getTimerById($timerId, $userId);
+            echo json_encode(['success' => true, 'status' => 'active', 'timer' => $timerData]);
         } else {
             echo json_encode(['success' => false, 'error' => $timer->getError()]);
         }

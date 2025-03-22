@@ -20,4 +20,3 @@ if ($timerId && $timer->isOwner($timerId, $userId) && $timer->deleteTimer($timer
 } else {
     echo json_encode(['success' => false, 'error' => 'Failed to delete timer or unauthorized']);
 }
-?>

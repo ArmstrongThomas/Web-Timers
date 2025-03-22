@@ -1,24 +1,61 @@
-function calculateRemainingTime(timer) {
-    const now = new Date().getTime();
-    const startTime = new Date(timer.start_time).getTime();
-    const pausedAt = timer.paused_at ? new Date(timer.paused_at).getTime() : null;
+const activeAnimations = {};
 
-    if (timer.status === 'paused' && pausedAt) {
+
+function convertUTCToLocal(utcTimestamp) {
+    if (!utcTimestamp) return "Unknown";
+
+    // Convert MySQL-style "YYYY-MM-DD HH:MM:SS" to ISO format "YYYY-MM-DDTHH:MM:SSZ"
+    const isoTimestamp = utcTimestamp.replace(" ", "T") + "Z";
+
+    const date = new Date(isoTimestamp);
+    return date.toLocaleString(undefined, {
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    });
+}
+
+
+
+// Calculate remaining time based on the new data structure.
+// For active timers, remaining = end_time - current time.
+// For paused timers, use the stored remaining_time.
+function calculateRemainingTime(timer) {
+    const now = Math.floor(Date.now() / 1000);
+
+    if (timer.status === 'paused') {
         return timer.remaining_time;
+    } else if (timer.status === 'active') {
+        // Append "Z" to force UTC interpretation if not already present.
+        const utcTimestamp = timer.end_time.includes("Z") ? timer.end_time : timer.end_time + "Z";
+        const endTimeUTC = new Date(utcTimestamp).getTime();
+        return Math.max(0, Math.floor(endTimeUTC / 1000) - now);
     } else {
-        const elapsed = (now - startTime) / 1000;
-        return Math.max(0, timer.length - elapsed);
+        return 0;
     }
 }
 
+
+// Updated animation function uses the calculated remaining time.
 function startTimerAnimation(timerId, duration, remainingTime, isPaused = false) {
+    // Cancel any existing animation for this timer.
+    if (activeAnimations[timerId]) {
+        cancelAnimationFrame(activeAnimations[timerId]);
+        delete activeAnimations[timerId];
+    }
+
     const timerCircle = document.getElementById(`timer-${timerId}`);
     const remainingTimeElement = timerCircle.querySelector('.remaining-time');
     const startTime = Date.now();
     const endTime = startTime + remainingTime * 1000;
 
     function updateTimer() {
-        if (isPaused) return;
+        // If paused, update the timer once to show its paused state, then exit.
+        if (isPaused) {
+            const percentage = remainingTime / duration;
+            const angle = 360 * percentage;
+            timerCircle.style.background = `conic-gradient(#007bff ${angle}deg, #e9ecef ${angle}deg)`;
+            remainingTimeElement.textContent = Math.ceil(remainingTime);
+            return;
+        }
 
         const now = Date.now();
         const remaining = Math.max(0, endTime - now);
@@ -29,28 +66,14 @@ function startTimerAnimation(timerId, duration, remainingTime, isPaused = false)
         remainingTimeElement.textContent = Math.ceil(remaining / 1000);
 
         if (remaining > 0) {
-            requestAnimationFrame(updateTimer);
+            activeAnimations[timerId] = requestAnimationFrame(updateTimer);
         }
     }
 
     updateTimer();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const timers = JSON.parse(document.getElementById('timers-data').textContent);
-    timers.forEach(timer => {
-        const timerContainer = document.querySelector(`.timer-container[data-id='${timer.id}']`);
-        if (timerContainer) {
-            const remainingTime = parseInt(timerContainer.getAttribute('data-remaining'), 10);
-            startTimerAnimation(timer.id, timer.length, remainingTime);
-        }
-    });
 
-    document.querySelector('form').addEventListener('submit', function (event) {
-        event.preventDefault();
-        createTimer();
-    });
-});
 
 function createTimer() {
     const formData = new FormData(document.querySelector('form'));
@@ -73,23 +96,36 @@ function addTimerToDOM(timer) {
     const timerContainer = document.createElement('div');
     timerContainer.classList.add('timer-container');
     timerContainer.setAttribute('data-id', timer.id);
+
     const remainingTime = calculateRemainingTime(timer);
+    const localizedEndTime = convertUTCToLocal(timer.end_time);
+
     timerContainer.setAttribute('data-remaining', remainingTime);
+
     timerContainer.innerHTML = `
         <button class='delete-btn' onclick='deleteTimer(${timer.id})'>X</button>
         <div class='timer-circle' id='timer-${timer.id}'>
             <div class='inner-circle'>
                 <span class='remaining-time'>${remainingTime}</span>
-                <span class='original-length'>${timer.length}</span>
+                <span class='original-length'>/${timer.length}</span>
             </div>
         </div>
         <div class='timer-title'>${timer.name}</div>
-        <button class='pause-resume-btn' onclick='pauseResumeTimer(${timer.id})'>${timer.status === 'paused' ? 'Resume' : 'Pause'}</button>
+        <div class='timer-end-time'>Ends: ${localizedEndTime}</div>
+        <button class='pause-resume-btn' onclick='pauseResumeTimer(${timer.id})'>${timer.status === 'paused' ? 'Resume' : timer.status === 'completed' ? 'Completed' : 'Pause'}</button>
         <button class='reset-btn' onclick='resetTimer(${timer.id})'>Reset</button>
     `;
     timersGrid.appendChild(timerContainer);
-    startTimerAnimation(timer.id, timer.length, remainingTime, timer.status === 'paused');
+
+    if (timer.status === 'active') {
+        startTimerAnimation(timer.id, timer.length, remainingTime, false);
+    } else if (timer.status === 'paused') {
+        startTimerAnimation(timer.id, timer.length, remainingTime, true);
+    }
 }
+
+
+
 
 function deleteTimer(timerId) {
     fetch(`/api/delete_timer.php?id=${timerId}`, {
@@ -114,12 +150,18 @@ function resetTimer(timerId) {
     })
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
+            if (data.success && data.timer) {
                 const timerContainer = document.querySelector(`.timer-container[data-id='${timerId}']`);
                 const remainingTimeElement = timerContainer.querySelector('.remaining-time');
-                const originalLength = parseInt(timerContainer.querySelector('.original-length').textContent, 10);
+                const pauseResumeBtn = timerContainer.querySelector('.pause-resume-btn');
+
+                // Use the API's returned length
+                const originalLength = data.timer.length;
                 timerContainer.setAttribute('data-remaining', originalLength);
                 remainingTimeElement.textContent = originalLength;
+                pauseResumeBtn.textContent = 'Pause';
+
+                // Restart the timer animation using the new original length.
                 startTimerAnimation(timerId, originalLength, originalLength, false);
             } else {
                 alert(data.error);
@@ -127,25 +169,46 @@ function resetTimer(timerId) {
         });
 }
 
+
+
 function pauseResumeTimer(timerId) {
     fetch(`/api/pause_resume_timer.php?id=${timerId}`, {
         method: 'POST'
     })
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
+            if (data.success && data.timer) {
                 const timerContainer = document.querySelector(`.timer-container[data-id='${timerId}']`);
                 const pauseResumeBtn = timerContainer.querySelector('.pause-resume-btn');
-                const remainingTime = parseInt(timerContainer.getAttribute('data-remaining'), 10);
+                const updatedTimer = data.timer;
+                const remainingTime = calculateRemainingTime(updatedTimer);
+                timerContainer.setAttribute('data-remaining', remainingTime);
+
                 if (data.status === 'paused') {
                     pauseResumeBtn.textContent = 'Resume';
-                    startTimerAnimation(timerId, remainingTime, remainingTime, true);
-                } else {
+                    // For paused timers, we use remainingTime as both the duration and remaining
+                    startTimerAnimation(timerId, updatedTimer.length, remainingTime, true);
+                } else if (data.status === 'active') {
                     pauseResumeBtn.textContent = 'Pause';
-                    startTimerAnimation(timerId, remainingTime, remainingTime, false);
+                    // For resumed timers, the timer's length is used for the animation duration
+                    startTimerAnimation(timerId, updatedTimer.length, remainingTime, false);
                 }
             } else {
                 alert(data.error);
             }
         });
 }
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const timers = JSON.parse(document.getElementById('timers-data').textContent);
+    timers.forEach(timer => {
+        // Directly add each timer to the DOM.
+        addTimerToDOM(timer);
+    });
+
+    document.querySelector('form').addEventListener('submit', function (event) {
+        event.preventDefault();
+        createTimer();
+    });
+});

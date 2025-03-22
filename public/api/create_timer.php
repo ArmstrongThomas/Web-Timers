@@ -14,8 +14,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_id = $session->getUserId();
 
     if ($timer->createTimer($user_id, $name, $length, $sound)) {
-        $newTimer = $timer->getTimersByUserId($user_id);
-        echo json_encode(['success' => true, 'timer' => end($newTimer)]);
+        // Retrieve the ID of the newly inserted timer
+        $newTimerId = $db->conn->insert_id;
+        // Fetch the new timer's data using getTimerById
+        $newTimer = $timer->getTimerById($newTimerId, $user_id);
+        echo json_encode(['success' => true, 'timer' => $newTimer]);
     } else {
         echo json_encode(['success' => false, 'error' => $timer->getError()]);
     }

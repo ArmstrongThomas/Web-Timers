@@ -13,17 +13,16 @@ $db = new Database();
 $timer = new Timer($db->conn);
 
 $timerId = $_GET['id'] ?? null;
+$status = $_GET['status'] ?? null;
 $userId = $session->getUserId();
 
-if ($timerId && $timer->isOwner($timerId, $userId)) {
-    if ($timer->resetTimer($timerId)) {
-        // Use getTimerById to fetch data for the specific timer.
-        $timerData = $timer->getTimerById($timerId, $userId);
-        echo json_encode(['success' => true, 'length' => $timerData['length'], 'timer' => $timerData]);
+if ($timerId && $status && $timer->isOwner($timerId, $userId)) {
+    if ($timer->updateStatus($timerId, $status)) {
+        echo json_encode(['success' => true]);
     } else {
         echo json_encode(['success' => false, 'error' => $timer->getError()]);
     }
 } else {
-    echo json_encode(['success' => false, 'error' => 'Failed to reset timer or unauthorized']);
+    echo json_encode(['success' => false, 'error' => 'Failed to update timer status or unauthorized']);
 }
 ?>
