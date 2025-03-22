@@ -1,5 +1,4 @@
 <?php
-
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use Dotenv\Dotenv;
@@ -21,6 +20,8 @@ class Database {
         if ($this->conn->connect_error) {
             die("Connection failed: " . $this->conn->connect_error);
         }
+        // Set MySQL connection timezone to UTC.
+        $this->conn->query("SET time_zone = '+00:00'");
     }
 }
 ?>
