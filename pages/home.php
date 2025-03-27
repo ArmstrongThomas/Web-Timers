@@ -3,6 +3,7 @@ require_once __DIR__ . '/../includes/Database.php';
 require_once __DIR__ . '/../includes/User.php';
 require_once __DIR__ . '/../includes/Session.php';
 require_once __DIR__ . '/../includes/layout.php';
+require_once __DIR__ . '/../includes/CSRF.php';
 
 $db = new Database();
 $user = new User($db->conn);
@@ -21,9 +22,12 @@ if ($session->isLoggedIn() || $session->validateSession()) {
 
 renderHeader('Home');
 
-echo <<<HTML
+// Use direct PHP output instead of heredoc with PHP code inside
+?>
+
 <h1>Login</h1>
 <form method="POST" action="/login">
+    <?php echo CSRF::tokenField(); ?>
     <input type="email" name="email" placeholder="Email" required>
     <input type="password" name="password" placeholder="Password" required>
     <label>
@@ -33,7 +37,7 @@ echo <<<HTML
 </form>
 <a href="/reset">Forgot Password?</a>
 <a href="/register">Register</a>
-HTML;
 
+<?php
 renderFooter();
 ?>

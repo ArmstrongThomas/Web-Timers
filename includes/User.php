@@ -51,6 +51,32 @@ class User {
     }
 
     public function register($name, $email, $password, $creation_ip, $verification_code, $code_expiry): bool {
+        // Validate name
+        $name = trim($name);
+        if (empty($name) || strlen($name) > 255) {
+            $this->error = "Name must be between 1 and 255 characters.";
+            return false;
+        }
+        
+        // Validate email
+        $email = filter_var(trim($email), FILTER_VALIDATE_EMAIL);
+        if (!$email) {
+            $this->error = "Please enter a valid email address.";
+            return false;
+        }
+        
+        // Validate password strength (already hashed, this is a second check)
+        if (strlen($password) < 60) { // BCRYPT hash is typically 60 chars
+            $this->error = "Password hash is invalid.";
+            return false;
+        }
+        
+        // Validate IP address
+        if (!filter_var($creation_ip, FILTER_VALIDATE_IP)) {
+            $creation_ip = "0.0.0.0"; // Default if invalid
+        }
+        
+        // Check if email exists
         $stmt = $this->conn->prepare("SELECT id FROM users WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();

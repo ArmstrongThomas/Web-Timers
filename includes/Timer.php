@@ -20,12 +20,31 @@ class Timer
      */
     public function createTimer($user_id, $name, $length, $sound): bool
     {
+        // Validate inputs
+        if (!is_numeric($user_id) || $user_id <= 0) {
+            $this->error = "Invalid user ID.";
+            return false;
+        }
+
+        // Sanitize and validate name
+        $name = trim($name);
+        if (empty($name) || strlen($name) > 255) {
+            $this->error = "Timer name must be between 1 and 255 characters.";
+            return false;
+        }
+        
+        // Validate sound path
+        if (empty($sound) || !preg_match('/^\/sounds\/[a-zA-Z0-9_\-\.]+\.(mp3|wav|ogg)$/i', $sound)) {
+            $this->error = "Invalid sound selection.";
+            return false;
+        }
+
         // Validate the timer length.
-        if ($length < 1) {
+        if (!is_numeric($length) || $length < 1) {
             $this->error = "Timer length must be at least 1 second.";
             return false;
         }
-        if ($length > 157680000 ) { // 5 years
+        if ($length > 157680000) { // 5 years
             $this->error = "Timer length cannot exceed 157680000 seconds.";
             return false;
         }
@@ -53,10 +72,10 @@ class Timer
     public function pauseTimer($timer_id): bool
     {
         $stmt = $this->conn->prepare("
-            UPDATE timers 
-            SET paused_at = NOW(), 
-                remaining_time = TIMESTAMPDIFF(SECOND, NOW(), end_time), 
-                status = 'paused' 
+            UPDATE timers
+            SET paused_at = NOW(),
+                remaining_time = TIMESTAMPDIFF(SECOND, NOW(), end_time),
+                status = 'paused'
             WHERE id = ?
         ");
         $stmt->bind_param("i", $timer_id);
@@ -75,12 +94,12 @@ class Timer
     public function resumeTimer($timer_id): bool
     {
         $stmt = $this->conn->prepare("
-            UPDATE timers 
-            SET start_time = NOW(), 
-                end_time = NOW() + INTERVAL remaining_time SECOND, 
-                paused_at = NULL, 
+            UPDATE timers
+            SET start_time = NOW(),
+                end_time = NOW() + INTERVAL remaining_time SECOND,
+                paused_at = NULL,
                 remaining_time = NULL,
-                status = 'active' 
+                status = 'active'
             WHERE id = ?
         ");
         $stmt->bind_param("i", $timer_id);
@@ -99,12 +118,12 @@ class Timer
     public function resetTimer($timer_id): bool
     {
         $stmt = $this->conn->prepare("
-            UPDATE timers 
+            UPDATE timers
             SET start_time = NOW(),
                 end_time = NOW() + INTERVAL length SECOND,
                 paused_at = NULL,
                 remaining_time = NULL,
-                status = 'active' 
+                status = 'active'
             WHERE id = ?
         ");
         $stmt->bind_param("i", $timer_id);
@@ -201,23 +220,4 @@ class Timer
         return $this->error;
     }
 
-    /**
-     * Makes an array of available sounds in the specified directory.
-     * Returns an array of sound file paths.
-     * Only files with extensions 'mp3', 'wav', and 'ogg' are included.
-     * The file paths are relative to the specified directory.
-     * If no sounds are found, an empty array is returned.
-     */
-    public function getAvailableSounds($directory): array
-    {
-        $sounds = [];
-        $allowed_extensions = ['mp3', 'wav', 'ogg'];
-        foreach (scandir($directory) as $file) {
-            $file_extension = pathinfo($file, PATHINFO_EXTENSION);
-            if (in_array($file_extension, $allowed_extensions, true)) {
-                $sounds[] = '/sounds/' . $file;
-            }
-        }
-        return $sounds;
-    }
 }

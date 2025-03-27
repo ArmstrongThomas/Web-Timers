@@ -32,7 +32,16 @@ class Session
     public function validateSession(): bool
     {
         if (isset($_COOKIE['session_key'])) {
-            $session_key = $_COOKIE['session_key'];
+            // Sanitize and validate session key
+            $session_key = trim($_COOKIE['session_key']);
+            
+            // Check for valid format (32-character hex string)
+            if (empty($session_key) || !preg_match('/^[a-f0-9]{32}$/i', $session_key)) {
+                // Invalid session key format, clear it
+                setcookie('session_key', '', time() - 3600, "/");
+                return false;
+            }
+            
             $db = new Database();
             $conn = $db->conn;
             $stmt = $conn->prepare("SELECT id FROM users WHERE session_key = ? AND session_expires > NOW()");
@@ -56,7 +65,19 @@ class Session
 
     public function getUserId()
     {
-        return $_SESSION['user_id'] ?? null;
+        if (!isset($_SESSION['user_id'])) {
+            return null;
+        }
+        
+        // Validate that user_id is a positive integer
+        $user_id = filter_var($_SESSION['user_id'], FILTER_VALIDATE_INT);
+        if ($user_id === false || $user_id <= 0) {
+            // Invalid user ID in session, clear it
+            unset($_SESSION['user_id']);
+            return null;
+        }
+        
+        return $user_id;
     }
 
     public function logout(): void

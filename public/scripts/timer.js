@@ -1,4 +1,67 @@
 const activeAnimations = {};
+let audioContext;
+const soundCache = {};
+
+/**
+ * Plays a sound when a timer completes
+ * @param {string} soundPath - Path to the sound file
+ */
+function playTimerSound(soundPath) {
+    // Check if user has muted sounds in settings
+    const soundSettings = JSON.parse(localStorage.getItem('soundSettings') || '{"enabled":true,"volume":0.7}');
+    if (!soundSettings.enabled) return;
+    
+    try {
+        // Create audio context lazily (must be created after user interaction)
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        
+        // Use cached sound if available, otherwise load it
+        if (soundCache[soundPath]) {
+            playSound(soundCache[soundPath], soundSettings.volume);
+        } else {
+            fetch(soundPath)
+                .then(response => response.arrayBuffer())
+                .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
+                .then(audioBuffer => {
+                    soundCache[soundPath] = audioBuffer;
+                    playSound(audioBuffer, soundSettings.volume);
+                })
+                .catch(error => {
+                    console.error('Error playing timer sound:', error);
+                    // Fallback to HTML5 Audio
+                    const audio = new Audio(soundPath);
+                    audio.volume = soundSettings.volume;
+                    audio.play().catch(err => console.error('Fallback audio failed:', err));
+                });
+        }
+    } catch (error) {
+        console.error('Error initializing audio:', error);
+        // Fallback to HTML5 Audio API if Web Audio API fails
+        const audio = new Audio(soundPath);
+        audio.volume = soundSettings.volume;
+        audio.play().catch(err => console.error('Fallback audio failed:', err));
+    }
+}
+
+/**
+ * Plays a decoded audio buffer with the Web Audio API
+ * @param {AudioBuffer} audioBuffer - The decoded audio data
+ * @param {number} volume - Volume level between 0 and 1
+ */
+function playSound(audioBuffer, volume) {
+    const source = audioContext.createBufferSource();
+    source.buffer = audioBuffer;
+    
+    // Add volume control
+    const gainNode = audioContext.createGain();
+    gainNode.gain.value = volume;
+    
+    source.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    source.start(0);
+}
 
 
 function convertUTCToLocal(utcTimestamp) {
@@ -67,6 +130,20 @@ function startTimerAnimation(timerId, duration, remainingTime, isPaused = false)
 
         if (remaining > 0) {
             activeAnimations[timerId] = requestAnimationFrame(updateTimer);
+        } else {
+            // Timer has completed - play sound
+            const timerContainer = document.querySelector(`.timer-container[data-id='${timerId}']`);
+            const soundPath = timerContainer.getAttribute('data-sound');
+            const pauseResumeBtn = timerContainer.querySelector('.pause-resume-btn');
+            pauseResumeBtn.textContent = 'Completed';
+            
+            // Update timer status to completed
+            fetch(`/api/update_status.php?id=${timerId}&status=completed`, {
+                method: 'POST'
+            });
+            
+            // Play the timer completion sound
+            playTimerSound(soundPath);
         }
     }
 
@@ -96,6 +173,7 @@ function addTimerToDOM(timer) {
     const timerContainer = document.createElement('div');
     timerContainer.classList.add('timer-container');
     timerContainer.setAttribute('data-id', timer.id);
+    timerContainer.setAttribute('data-sound', timer.sound);
 
     const remainingTime = calculateRemainingTime(timer);
     const localizedEndTime = convertUTCToLocal(timer.end_time);

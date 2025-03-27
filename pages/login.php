@@ -3,14 +3,42 @@ require_once __DIR__ . '/../includes/Database.php';
 require_once __DIR__ . '/../includes/User.php';
 require_once __DIR__ . '/../includes/Session.php';
 require_once __DIR__ . '/../includes/layout.php';
+require_once __DIR__ . '/../includes/CSRF.php';
 
 $db = new Database();
 $user = new User($db->conn);
 $session = new Session();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = $_POST['email'];
-    $password = $_POST['password'];
+    // Validate CSRF token
+    if (!isset($_POST['csrf_token']) || !CSRF::validateToken($_POST['csrf_token'])) {
+        echo "<p style='color: red;'>Invalid form submission. Please try again.</p>";
+        renderHeader('Login');
+        include(__DIR__ . '/login-form.php');
+        renderFooter();
+        exit;
+    }
+
+    // Sanitize and validate email
+    $email = filter_var(trim($_POST['email'] ?? ''), FILTER_VALIDATE_EMAIL);
+    if (!$email) {
+        echo "<p style='color: red;'>Please enter a valid email address.</p>";
+        renderHeader('Login');
+        include(__DIR__ . '/login-form.php');
+        renderFooter();
+        exit;
+    }
+
+    // Validate password (not empty)
+    $password = $_POST['password'] ?? '';
+    if (empty($password)) {
+        echo "<p style='color: red;'>Password is required.</p>";
+        renderHeader('Login');
+        include(__DIR__ . '/login-form.php');
+        renderFooter();
+        exit;
+    }
+
     $userData = $user->getUserByEmail($email);
 
     if ($userData && password_verify($password, $userData['password'])) {
@@ -47,6 +75,7 @@ renderHeader('Login');
 
     <h1>Login</h1>
     <form method="POST">
+        <?php echo CSRF::tokenField(); ?>
         <input type="email" name="email" placeholder="Email" required>
         <input type="password" name="password" placeholder="Password" required>
         <label>

@@ -1,8 +1,10 @@
 <?php
 require_once __DIR__ . '/../includes/layout.php';
 
-$message = $_GET['message'] ?? 'default';
+// Sanitize and validate message parameter
+$message = isset($_GET['message']) ? trim($_GET['message']) : 'default';
 
+// Define allowed messages and their data
 $messages = [
     'registration_complete' => [
         'text' => "Registration complete, check your email to confirm your account. If you don't see it within a few minutes, check your spam folder.",
@@ -33,6 +35,11 @@ $messages = [
         'next' => '/'
     ]
 ];
+
+// Validate message is in allowed list
+if (!array_key_exists($message, $messages)) {
+    $message = 'default';
+}
 
 $messageData = $messages[$message];
 $nextUrl = $messageData['next'];
