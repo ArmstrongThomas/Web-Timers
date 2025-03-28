@@ -5,40 +5,39 @@ A web application for creating and managing custom timers with notifications, de
 ## Features
 
 ### **User Authentication**
-
 - Secure login/registration with email verification.
 - Password reset via email.
 - Account lockout after failed attempts (with magic login links).
 - CSRF protection for all forms.
 
 ### **Timer Management**
-
 - Create timers with custom names, durations, and sounds.
 - Pause/resume functionality.
 - Reset timers to their original duration.
 - Visual countdown with circular progress animation.
 - Sound notifications on timer completion.
+- **Drag-and-drop reordering** of timers.
+- **Collapsible forms** for creating timers and adjusting sound settings.
 
 ### **User Experience**
-
 - Responsive design with consistent styling (`utility.css`).
 - Auto-redirects for success/error messages (`response.php`).
 - Timezone support (based on user device settings).
 - Sound settings (enable/disable, volume control).
+- **Smooth animations** for timer interactions.
+- **Visual feedback** during drag-and-drop operations.
 
 ### **Technical Highlights**
-
 - **Database**: MySQL with tables for `users` and `timers`.
 - **Security**: Password hashing (bcrypt), CSRF tokens, input validation.
-- **API**: RESTful endpoints for timer operations (`create`, `pause/resume`, `reset`, `delete`).
-- **Frontend**: Vanilla JavaScript for dynamic timer animations and sound playback.
+- **API**: RESTful endpoints for timer operations (`create`, `pause/resume`, `reset`, `delete`, `update_positions`).
+- **Frontend**: Vanilla JavaScript for dynamic timer animations, sound playback, and drag-and-drop.
 
 ---
 
 ## Project Structure
 
 ### Key Files
-
 - **`pages/`**:
   - Auth pages (`login.php`, `register.php`, `reset-password.php`).
   - Dashboard (`dashboard.php`) for timer management.
@@ -51,19 +50,30 @@ A web application for creating and managing custom timers with notifications, de
   - Utilities (`Mailer.php`, `Session.php`, `Sound.php`).
 
 ### Database Schema
-
 - **`users`**: Stores user accounts, sessions, and security codes.
-- **`timers`**: Tracks timer details (name, duration, status, etc.).
+- **`timers`**: Tracks timer details (name, duration, status, position, etc.).
 
 ---
 
-## Planned Features
+## New Functionality (Since Last Update)
 
-- Custom timer icons/colors.
-- Push notifications (browser/desktop).
-- Timer sounds continuing playing until dismissed.
-- Timer sharing/collaboration.
-- Schedule timers for a specific date and time.
+### Drag-and-Drop Timer Reordering
+- Users can now **reorder timers** by dragging and dropping them.
+- The new order is saved automatically via the `update_timer_positions.php` API endpoint.
+- Visual guides appear during dragging for better feedback.
+
+### Collapsible Forms
+- The "Create Timer" and "Sound Settings" forms can now be **toggled open/closed**.
+- Cleaner UI when forms are not in use.
+
+### Improved Timer Animations
+- Smoother countdown animations.
+- Blinking effect for completed timers.
+
+### Sound Management
+- Per-timer sound playback control.
+- Global sound settings (enable/disable, volume).
+
 ---
 
 ## Setup Instructions
