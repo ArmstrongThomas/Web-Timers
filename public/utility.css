@@ -1,3 +1,27 @@
+/* styles.css overrides */
+.top-container {
+    width: 100%;
+    min-height: unset;
+    position: relative;
+    top: 0px;
+    margin: 0;
+    background-color: #f8f9fa;
+    z-index: 1000;
+}
+
+.welcome-message {
+    display: block;
+    margin: auto;
+    font-size: 20px;
+    text-align: center;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: unset;
+    border-radius: 8px;
+}
+
+/* utility styles */
+
 .auth-container {
     max-width: 500px;
     margin: 0 auto;
@@ -9,6 +33,7 @@
 
 .form-group {
     margin-bottom: 20px;
+    align-items: center;
 }
 
 .form-group label {
@@ -18,7 +43,7 @@
 }
 
 .form-group input {
-    width: 100%;
+    width: 80%;
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;

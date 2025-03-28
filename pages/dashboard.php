@@ -32,7 +32,10 @@ echo "Welcome, " . htmlspecialchars($userData['name']) . "!<br>";
 echo "<a href='/logout'>Logout</a></div>";
 echo "<div class='container'>";
 
-echo "<div class='create-timer-container'>
+echo "<button class='toggle-form-btn' onclick='toggleTimerForm()'>Create Timer</button>";
+echo "<button class='toggle-form-btn' onclick='toggleSoundSettings()'>Sound Settings</button>";
+
+echo "<div class='create-timer-container collapsed'>
     <h2>Create a New Timer</h2>
     <form method='POST' class='timer-form'>
         " . CSRF::tokenField() . "
@@ -99,6 +102,19 @@ echo "</select>
         <button type='submit' class='create-timer-btn'>Create Timer</button>
     </form>
 </div>";
+// Add sound settings UI
+echo "<div class='sound-settings collapsed'>
+    <h3>Sound Settings</h3>
+    <div>
+        <label for='sound-enabled'>Enable Sounds: </label>
+        <input type='checkbox' id='sound-enabled' checked>
+    </div>
+    <div>
+        <label for='sound-volume'>Volume: </label>
+        <input type='range' id='sound-volume' min='0' max='1' step='0.1' value='0.7'>
+    </div>
+    <button id='test-sound-btn'>Test Sound</button>
+</div>";
 
 // Fetch the timers for the current user.
 $timers = $timer->getTimersByUserId($session->getUserId());
@@ -111,20 +127,6 @@ if (!empty($timers)) {
         // Handle JSON error if necessary.
     }
 }
-
-// Add sound settings UI
-echo "<div class='sound-settings'>
-    <h3>Sound Settings</h3>
-    <div>
-        <label for='sound-enabled'>Enable Sounds: </label>
-        <input type='checkbox' id='sound-enabled' checked>
-    </div>
-    <div>
-        <label for='sound-volume'>Volume: </label>
-        <input type='range' id='sound-volume' min='0' max='1' step='0.1' value='0.7'>
-    </div>
-    <button id='test-sound-btn'>Test Sound</button>
-</div>";
 
 // Add sound settings JavaScript
 echo "<script>
@@ -209,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let audioContainer = document.querySelector('.audio-container');
 
         audio.src = sound;
-        audioContainer.style.display = 'block';
+        audioContainer.style.display = 'hidden';
         audio.play();
     };
 });

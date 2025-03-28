@@ -1,3 +1,28 @@
+function toggleTimerForm() {
+    const formContainer = document.querySelector('.create-timer-container');
+    const toggleBtn = document.querySelector('.toggle-form-btn');
+
+    if (formContainer.classList.contains('collapsed')) {
+        formContainer.classList.remove('collapsed');
+        toggleBtn.textContent = 'Hide Timer Creation';
+    } else {
+        formContainer.classList.add('collapsed');
+        toggleBtn.textContent = 'Create Timer';
+    }
+}
+function toggleSoundSettings() {
+    const soundSettings = document.querySelector('.sound-settings');
+    const toggleBtn = document.querySelector('.toggle-form-btn:nth-of-type(2)');
+
+    if (soundSettings.classList.contains('collapsed')) {
+        soundSettings.classList.remove('collapsed');
+        toggleBtn.textContent = 'Hide Sound Settings';
+    } else {
+        soundSettings.classList.add('collapsed');
+        toggleBtn.textContent = 'Sound Settings';
+    }
+}
+
 function formatTime(seconds) {
   if (seconds <= 0) return "00:00";
   const hours = Math.floor(seconds / 3600);
@@ -32,7 +57,7 @@ function playLoopingSound(soundPath, timerId) {
   audio.volume = soundSettings.volume;
   audio.loop = true;
   audio.play().catch((e) => console.error("Audio play failed:", e));
-  
+
   // Store the audio object associated with this timer
   timerSounds[timerId] = audio;
   return audio;
@@ -43,7 +68,7 @@ function stopLoopingSound(timerId) {
   if (timerId !== undefined && timerSounds[timerId]) {
     timerSounds[timerId].pause();
     delete timerSounds[timerId];
-  } 
+  }
   // Otherwise, stop all sounds (for backward compatibility)
   else if (timerId === undefined) {
     Object.keys(timerSounds).forEach(id => {
@@ -76,7 +101,7 @@ function stopBlinking(timerId) {
   if (timerId && blinkingIntervals[timerId]) {
     clearInterval(blinkingIntervals[timerId]);
     delete blinkingIntervals[timerId];
-    
+
     // Make sure the timer element is visible
     const timerContainer = document.querySelector(`.timer-container[data-id='${timerId}']`);
     if (timerContainer) {
@@ -85,12 +110,12 @@ function stopBlinking(timerId) {
         remainingTimeElement.style.visibility = "visible";
       }
     }
-  } 
+  }
   // If no timerId is provided, stop all blinking (legacy support)
   else if (!timerId) {
     Object.keys(blinkingIntervals).forEach(id => {
       clearInterval(blinkingIntervals[id]);
-      
+
       // Make sure all timer elements are visible
       const timerContainer = document.querySelector(`.timer-container[data-id='${id}']`);
       if (timerContainer) {
@@ -146,12 +171,12 @@ function playTimerSound(soundPath, timerId = null) {
           // Fallback to HTML5 Audio
           const audio = new Audio(soundPath);
           audio.volume = soundSettings.volume;
-          
+
           // If this is for a specific timer, associate this audio with that timer
           if (timerId) {
             timerSounds[timerId] = audio;
           }
-          
+
           audio
             .play()
             .catch((err) => console.error("Fallback audio failed:", err));
@@ -162,12 +187,12 @@ function playTimerSound(soundPath, timerId = null) {
     // Fallback to HTML5 Audio API if Web Audio API fails
     const audio = new Audio(soundPath);
     audio.volume = soundSettings.volume;
-    
+
     // If this is for a specific timer, associate this audio with that timer
     if (timerId) {
       timerSounds[timerId] = audio;
     }
-    
+
     audio.play().catch((err) => console.error("Fallback audio failed:", err));
   }
 }
@@ -189,7 +214,7 @@ function playSound(audioBuffer, volume, timerId = null) {
   source.connect(gainNode);
   gainNode.connect(audioContext.destination);
   source.start(0);
-  
+
   // If this is associated with a specific timer, we need to track it
   // This is a simplified implementation since Web Audio API nodes can't be paused directly
   if (timerId) {
@@ -198,7 +223,7 @@ function playSound(audioBuffer, volume, timerId = null) {
     tracker.volume = volume;
     // Use this to track that a sound is playing for this timer
     timerSounds[timerId] = tracker;
-    
+
     // When the buffer finishes playing, remove from tracking
     source.onended = () => {
       if (timerSounds[timerId] === tracker) {
@@ -324,10 +349,10 @@ function createTimer() {
 function dismissTimer(timerId) {
   // Get the timer container
   const timerContainer = document.querySelector(`.timer-container[data-id='${timerId}']`);
-  
+
   // Stop this specific timer's sound
   stopLoopingSound(timerId);
-  
+
   // Stop blinking for this specific timer
   stopBlinking(timerId);
 
@@ -340,7 +365,7 @@ function dismissTimer(timerId) {
         const pauseResumeBtn = timerContainer.querySelector(".pause-resume-btn");
         pauseResumeBtn.textContent = "Completed";
         pauseResumeBtn.onclick = null;
-        
+
         // Reset the timer display
         const remainingTimeElement = timerContainer.querySelector('.remaining-time');
         if (remainingTimeElement) {
