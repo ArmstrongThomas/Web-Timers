@@ -194,3 +194,159 @@ body, html {
 #test-sound-btn:hover {
     background-color: #218838;
 }
+
+/* Timer form improvements */
+.timer-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.timer-form label {
+    font-weight: 600;
+    color: #444;
+    font-size: 14px;
+}
+
+.timer-form input[type="text"] {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    width: 100%;
+}
+
+.duration-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.duration-input {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.duration-input input {
+    width: 65px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 16px;
+}
+
+.duration-input span {
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+}
+
+.sound-selection {
+    display: flex;
+    gap: 10px;
+}
+
+.sound-dropdown {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+    font-size: 16px;
+}
+
+.preview-sound-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 15px;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #444;
+    transition: background-color 0.2s;
+}
+
+.preview-sound-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.audio-container {
+    display: none;
+    margin-top: 10px;
+}
+
+.audio-container audio {
+    width: 100%;
+    height: 40px;
+}
+
+.form-preview {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0;
+}
+
+.timer-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.timer-circle-preview {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: conic-gradient(#007bff 360deg, #e9ecef 0deg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.timer-circle-preview .inner-circle {
+    width: 80px;
+    height: 80px;
+    background-color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.preview-time {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.preview-label {
+    font-size: 14px;
+    color: #666;
+}
+
+.create-timer-btn {
+    padding: 12px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 10px;
+    align-self: center;
+}
+
+.create-timer-btn:hover {
+    background-color: #0069d9;
+}

@@ -7,32 +7,46 @@ $message = isset($_GET['message']) ? trim($_GET['message']) : 'default';
 // Define allowed messages and their data
 $messages = [
     'registration_complete' => [
-        'text' => "Registration complete, check your email to confirm your account. If you don't see it within a few minutes, check your spam folder.",
-        'next' => '/login'
+        'title' => "Registration Complete",
+        'text' => "Check your email to confirm your account. If you don't see it within a few minutes, check your spam folder.",
+        'next' => '/login',
+        'type' => 'success'
     ],
     'account_confirmed' => [
+        'title' => "Account Confirmed",
         'text' => "Thanks for confirming your account!",
-        'next' => '/login'
+        'next' => '/login',
+        'type' => 'success'
     ],
     'password_reset' => [
-        'text' => "Password reset email sent! Check your email. If you don't see it within a few minutes, check your spam folder.",
-        'next' => '/login'
+        'title' => "Reset Email Sent",
+        'text' => "Check your email for the password reset link. If you don't see it within a few minutes, check your spam folder.",
+        'next' => '/login',
+        'type' => 'success'
     ],
     'password_reset_success' => [
+        'title' => "Password Reset",
         'text' => "Your password has been successfully reset.",
-        'next' => '/login'
+        'next' => '/login',
+        'type' => 'success'
     ],
     'magic_login_success' => [
-        'text' => "Your account has been unlocked and you are now logged in.",
-        'next' => '/dashboard'
+        'title' => "Account Unlocked",
+        'text' => "Your account has been unlocked, and you are now logged in.",
+        'next' => '/dashboard',
+        'type' => 'success'
     ],
     'login_success' => [
-        'text' => "Welcome back!",
-        'next' => '/dashboard'
+        'title' => "Welcome Back",
+        'text' => "You are now logged in.",
+        'next' => '/dashboard',
+        'type' => 'success'
     ],
     'default' => [
+        'title' => "Error",
         'text' => "An unknown error occurred.",
-        'next' => '/'
+        'next' => '/',
+        'type' => 'error'
     ]
 ];
 
@@ -44,18 +58,26 @@ if (!array_key_exists($message, $messages)) {
 $messageData = $messages[$message];
 $nextUrl = $messageData['next'];
 
-renderHeader('Response');
+renderHeader($messageData['title']);
 ?>
 
-    <h1>Response</h1>
-    <p><?php echo htmlspecialchars($messageData['text']); ?></p>
-    <p><a href="<?php echo htmlspecialchars($nextUrl); ?>">Click here to continue</a></p>
+<div class="auth-container">
+    <h1><?php echo htmlspecialchars($messageData['title']); ?></h1>
+    <div class="message <?php echo htmlspecialchars($messageData['type']); ?>">
+        <p><?php echo htmlspecialchars($messageData['text']); ?></p>
+    </div>
+    <div class="form-footer">
+        <a href="<?php echo htmlspecialchars($nextUrl); ?>" class="submit-btn">Continue</a>
+    </div>
+</div>
 
-    <script>
-        setTimeout(function() {
-            window.location.href = "<?php echo htmlspecialchars($nextUrl); ?>";
-        }, 5000);
-    </script>
+<script>
+    setTimeout(function() {
+        window.location.href = "<?php echo htmlspecialchars($nextUrl); ?>";
+    }, 3000);
+</script>
+
+<link rel="stylesheet" href="/utility.css">
 
 <?php
 renderFooter();
