@@ -148,6 +148,6 @@ A web application for creating and managing custom timers with notifications, de
 
 ## Screenshots
 
-[<img src="https://7db.pw/19cdca5">]
-[<img src="https://7db.pw/d987db">]
-[<img src="https://7db.pw/45783bb">]
+<img src="https://7db.pw/19cdca5">
+<img src="https://7db.pw/d987db">
+<img src="https://7db.pw/45783bb">
