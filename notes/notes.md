@@ -87,30 +87,23 @@ VALUES (1, 'Game Cooldown', 600, NOW(), NOW() + INTERVAL 600 SECOND, 'active');
 
 #### **2. User pauses it at `12:05 PM` (300s left)**
 ```sql
-UPDATE timers 
-SET paused_at = NOW(), 
-    remaining_time = TIMESTAMPDIFF(SECOND, NOW(), end_time), 
-    status = 'paused' 
+UPDATE timers
+SET paused_at = NOW(),
+    remaining_time = TIMESTAMPDIFF(SECOND, NOW(), end_time),
+    status = 'paused'
 WHERE id = 1;
 ```
 ✅ `paused_at = 12:05 PM`, `remaining_time = 300`
 
 #### **3. User resumes at `12:10 PM`**
 ```sql
-UPDATE timers 
-SET start_time = NOW(), 
-    end_time = NOW() + INTERVAL remaining_time SECOND, 
-    paused_at = NULL, 
-    status = 'active' 
+UPDATE timers
+SET start_time = NOW(),
+    end_time = NOW() + INTERVAL remaining_time SECOND,
+    paused_at = NULL,
+    status = 'active'
 WHERE id = 1;
 ```
 ✅ `new end_time = 12:15 PM`, countdown resumes.
 
 ---
-
-### **Why This Works**
-- Pausing **doesn’t reset the countdown**, just stores the remaining time.
-- Resuming **calculates a new end time** rather than restarting.
-- Works **even if the user refreshes or logs out** since data is stored.
-
-Would you like to support **manual time adjustments while paused**? 🚀
