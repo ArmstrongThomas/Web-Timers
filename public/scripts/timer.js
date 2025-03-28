@@ -1,26 +1,26 @@
 function toggleTimerForm() {
-    const formContainer = document.querySelector('.create-timer-container');
-    const toggleBtn = document.querySelector('.toggle-form-btn');
+  const formContainer = document.querySelector(".create-timer-container");
+  const toggleBtn = document.querySelector(".toggle-form-btn");
 
-    if (formContainer.classList.contains('collapsed')) {
-        formContainer.classList.remove('collapsed');
-        toggleBtn.textContent = 'Hide Timer Creation';
-    } else {
-        formContainer.classList.add('collapsed');
-        toggleBtn.textContent = 'Create Timer';
-    }
+  if (formContainer.classList.contains("collapsed")) {
+    formContainer.classList.remove("collapsed");
+    toggleBtn.textContent = "Hide Timer Creation";
+  } else {
+    formContainer.classList.add("collapsed");
+    toggleBtn.textContent = "Create Timer";
+  }
 }
 function toggleSoundSettings() {
-    const soundSettings = document.querySelector('.sound-settings');
-    const toggleBtn = document.querySelector('.toggle-form-btn:nth-of-type(2)');
+  const soundSettings = document.querySelector(".sound-settings");
+  const toggleBtn = document.querySelector(".toggle-form-btn:nth-of-type(2)");
 
-    if (soundSettings.classList.contains('collapsed')) {
-        soundSettings.classList.remove('collapsed');
-        toggleBtn.textContent = 'Hide Sound Settings';
-    } else {
-        soundSettings.classList.add('collapsed');
-        toggleBtn.textContent = 'Sound Settings';
-    }
+  if (soundSettings.classList.contains("collapsed")) {
+    soundSettings.classList.remove("collapsed");
+    toggleBtn.textContent = "Hide Sound Settings";
+  } else {
+    soundSettings.classList.add("collapsed");
+    toggleBtn.textContent = "Sound Settings";
+  }
 }
 
 function formatTime(seconds) {
@@ -43,7 +43,7 @@ const soundCache = {};
 
 function playLoopingSound(soundPath, timerId) {
   const soundSettings = JSON.parse(
-    localStorage.getItem("soundSettings") || '{"enabled":true,"volume":0.7}'
+    localStorage.getItem("soundSettings") || '{"enabled":true,"volume":0.7}',
   );
   if (!soundSettings.enabled) return;
 
@@ -71,19 +71,21 @@ function stopLoopingSound(timerId) {
   }
   // Otherwise, stop all sounds (for backward compatibility)
   else if (timerId === undefined) {
-    Object.keys(timerSounds).forEach(id => {
+    Object.keys(timerSounds).forEach((id) => {
       timerSounds[id].pause();
     });
     // Clear all timer sounds
-    Object.keys(timerSounds).forEach(id => delete timerSounds[id]);
+    Object.keys(timerSounds).forEach((id) => delete timerSounds[id]);
   }
 }
 
 function startBlinking(timerId) {
-  const timerContainer = document.querySelector(`.timer-container[data-id='${timerId}']`);
+  const timerContainer = document.querySelector(
+    `.timer-container[data-id='${timerId}']`,
+  );
   if (!timerContainer) return;
 
-  const remainingTimeElement = timerContainer.querySelector('.remaining-time');
+  const remainingTimeElement = timerContainer.querySelector(".remaining-time");
   if (!remainingTimeElement) return;
 
   // Clear any existing interval for this timer
@@ -103,9 +105,12 @@ function stopBlinking(timerId) {
     delete blinkingIntervals[timerId];
 
     // Make sure the timer element is visible
-    const timerContainer = document.querySelector(`.timer-container[data-id='${timerId}']`);
+    const timerContainer = document.querySelector(
+      `.timer-container[data-id='${timerId}']`,
+    );
     if (timerContainer) {
-      const remainingTimeElement = timerContainer.querySelector('.remaining-time');
+      const remainingTimeElement =
+        timerContainer.querySelector(".remaining-time");
       if (remainingTimeElement) {
         remainingTimeElement.style.visibility = "visible";
       }
@@ -113,13 +118,16 @@ function stopBlinking(timerId) {
   }
   // If no timerId is provided, stop all blinking (legacy support)
   else if (!timerId) {
-    Object.keys(blinkingIntervals).forEach(id => {
+    Object.keys(blinkingIntervals).forEach((id) => {
       clearInterval(blinkingIntervals[id]);
 
       // Make sure all timer elements are visible
-      const timerContainer = document.querySelector(`.timer-container[data-id='${id}']`);
+      const timerContainer = document.querySelector(
+        `.timer-container[data-id='${id}']`,
+      );
       if (timerContainer) {
-        const remainingTimeElement = timerContainer.querySelector('.remaining-time');
+        const remainingTimeElement =
+          timerContainer.querySelector(".remaining-time");
         if (remainingTimeElement) {
           remainingTimeElement.style.visibility = "visible";
         }
@@ -128,7 +136,6 @@ function stopBlinking(timerId) {
     blinkingIntervals = {};
   }
 }
-
 
 /**
  * Plays a sound when a timer completes or when testing a sound
@@ -266,7 +273,12 @@ function calculateRemainingTime(timer) {
 }
 
 // Updated animation function uses the calculated remaining time.
-function startTimerAnimation(timerId, duration, remainingTime, isPaused = false) {
+function startTimerAnimation(
+  timerId,
+  duration,
+  remainingTime,
+  isPaused = false,
+) {
   // Cancel any existing animation for this timer
   if (activeAnimations[timerId]) {
     cancelAnimationFrame(activeAnimations[timerId]);
@@ -276,9 +288,9 @@ function startTimerAnimation(timerId, duration, remainingTime, isPaused = false)
   const timerCircle = document.getElementById(`timer-${timerId}`);
   if (!timerCircle) return;
 
-  const remainingTimeElement = timerCircle.querySelector('.remaining-time');
+  const remainingTimeElement = timerCircle.querySelector(".remaining-time");
   const pauseResumeBtn = document.querySelector(
-    `.timer-container[data-id='${timerId}'] .pause-resume-btn`
+    `.timer-container[data-id='${timerId}'] .pause-resume-btn`,
   );
 
   // Ensure visibility is reset
@@ -313,7 +325,7 @@ function startTimerAnimation(timerId, duration, remainingTime, isPaused = false)
       startBlinking(timerId);
 
       const timerContainer = document.querySelector(
-        `.timer-container[data-id='${timerId}']`
+        `.timer-container[data-id='${timerId}']`,
       );
       const soundPath = timerContainer.getAttribute("data-sound");
 
@@ -348,7 +360,9 @@ function createTimer() {
 
 function dismissTimer(timerId) {
   // Get the timer container
-  const timerContainer = document.querySelector(`.timer-container[data-id='${timerId}']`);
+  const timerContainer = document.querySelector(
+    `.timer-container[data-id='${timerId}']`,
+  );
 
   // Stop this specific timer's sound
   stopLoopingSound(timerId);
@@ -362,12 +376,14 @@ function dismissTimer(timerId) {
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
-        const pauseResumeBtn = timerContainer.querySelector(".pause-resume-btn");
+        const pauseResumeBtn =
+          timerContainer.querySelector(".pause-resume-btn");
         pauseResumeBtn.textContent = "Completed";
         pauseResumeBtn.onclick = null;
 
         // Reset the timer display
-        const remainingTimeElement = timerContainer.querySelector('.remaining-time');
+        const remainingTimeElement =
+          timerContainer.querySelector(".remaining-time");
         if (remainingTimeElement) {
           remainingTimeElement.style.visibility = "visible";
         }
@@ -380,6 +396,7 @@ function addTimerToDOM(timer) {
   const timerContainer = document.createElement("div");
   timerContainer.classList.add("timer-container");
   timerContainer.setAttribute("data-id", timer.id);
+  timerContainer.setAttribute("draggable", "true");
   timerContainer.setAttribute("data-sound", timer.sound);
 
   const remainingTime = calculateRemainingTime(timer);
@@ -438,12 +455,14 @@ function resetTimer(timerId) {
     .then((data) => {
       if (data.success && data.timer) {
         const timerContainer = document.querySelector(
-          `.timer-container[data-id='${timerId}']`
+          `.timer-container[data-id='${timerId}']`,
         );
         if (!timerContainer) return;
 
-        const remainingTimeElement = timerContainer.querySelector('.remaining-time');
-        const pauseResumeBtn = timerContainer.querySelector('.pause-resume-btn');
+        const remainingTimeElement =
+          timerContainer.querySelector(".remaining-time");
+        const pauseResumeBtn =
+          timerContainer.querySelector(".pause-resume-btn");
 
         // Update UI with new timer data
         const originalLength = data.timer.length;
@@ -466,11 +485,12 @@ function pauseResumeTimer(timerId) {
     .then((data) => {
       if (data.success && data.timer) {
         const timerContainer = document.querySelector(
-          `.timer-container[data-id='${timerId}']`
+          `.timer-container[data-id='${timerId}']`,
         );
         if (!timerContainer) return;
 
-        const pauseResumeBtn = timerContainer.querySelector('.pause-resume-btn');
+        const pauseResumeBtn =
+          timerContainer.querySelector(".pause-resume-btn");
         const updatedTimer = data.timer;
         const remainingTime = calculateRemainingTime(updatedTimer);
 
@@ -479,16 +499,27 @@ function pauseResumeTimer(timerId) {
 
         if (data.status === "paused") {
           pauseResumeBtn.textContent = "Resume";
-          startTimerAnimation(timerId, updatedTimer.length, remainingTime, true);
+          startTimerAnimation(
+            timerId,
+            updatedTimer.length,
+            remainingTime,
+            true,
+          );
         } else {
           pauseResumeBtn.textContent = "Pause";
-          startTimerAnimation(timerId, updatedTimer.length, remainingTime, false);
+          startTimerAnimation(
+            timerId,
+            updatedTimer.length,
+            remainingTime,
+            false,
+          );
         }
       }
     });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  let dragOffset = { x: 0, y: 0 };
   const timers = JSON.parse(document.getElementById("timers-data").textContent);
   timers.forEach((timer) => {
     // Directly add each timer to the DOM.
@@ -499,4 +530,137 @@ document.addEventListener("DOMContentLoaded", () => {
     event.preventDefault();
     createTimer();
   });
+  const timersGrid = document.querySelector(".timers-grid");
+
+  // Drag start
+  document.addEventListener("dragstart", (e) => {
+    if (e.target.classList.contains("timer-container")) {
+      const rect = e.target.getBoundingClientRect();
+      dragOffset = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+      e.dataTransfer.setData("text/plain", e.target.dataset.id);
+      e.target.classList.add("dragging");
+
+      // Add visual grid guides
+      document.querySelectorAll(".timer-container").forEach(el => {
+        el.classList.add("drop-guide");
+      });
+    }
+  });
+
+  // Drag over
+  document.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    const draggingTimer = document.querySelector(".dragging");
+    if (!draggingTimer) return;
+
+    // Calculate drop position based on click anchor point
+    const dropX = e.clientX - dragOffset.x;
+    const dropY = e.clientY - dragOffset.y;
+
+    const afterElement = getNearestTimer(dropX, dropY);
+    const timersGrid = document.querySelector(".timers-grid");
+
+    if (afterElement) {
+      // Swap positions instead of insert
+      const temp = document.createElement("div");
+      timersGrid.insertBefore(temp, afterElement);
+      timersGrid.insertBefore(draggingTimer, temp);
+      temp.remove();
+    } else {
+      timersGrid.appendChild(draggingTimer);
+    }
+  });
+
+  // Drag end
+  document.addEventListener("dragend", (e) => {
+    if (e.target.classList.contains("timer-container")) {
+      e.target.classList.remove("dragging");
+
+      // Remove visual guides
+      document.querySelectorAll(".timer-container").forEach(el => {
+        el.classList.remove("drop-guide");
+      });
+
+      updateTimerPositions();
+    }
+  });
 });
+
+// Helper function to determine drop position
+function getDragAfterElement(x, y) {
+  const draggableElements = [...document.querySelectorAll(".timer-container:not(.dragging)")];
+
+  return draggableElements.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const horizontalOffset = x - box.left - box.width / 2;
+    const verticalOffset = y - box.top - box.height / 2;
+    const distance = Math.sqrt(horizontalOffset ** 2 + verticalOffset ** 2);
+
+    // Prioritize vertical proximity but consider horizontal position for wide layouts
+    if (verticalOffset < 0 && verticalOffset > closest.offset) {
+      return { offset: verticalOffset, element: child };
+    } else if (Math.abs(verticalOffset) < box.height / 2 && Math.abs(horizontalOffset) < box.width / 2) {
+      return { offset: 0, element: child }; // Snap to nearest element
+    } else {
+      return closest;
+    }
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+function getNearestTimer(x, y) {
+  const timers = [...document.querySelectorAll(".timer-container:not(.dragging)")];
+  const timersGrid = document.querySelector(".timers-grid");
+  const gridRect = timersGrid.getBoundingClientRect();
+
+  // If there are no timers (edge case), return null to append
+  if (timers.length === 0) return null;
+
+  // Check if the drop position is beyond the last timer
+  const lastTimer = timers[timers.length - 1];
+  const lastTimerRect = lastTimer.getBoundingClientRect();
+  const threshold = 20; // Pixels beyond the last timer to trigger append
+
+  if (y > lastTimerRect.bottom + threshold) {
+    return null; // Append to end
+  }
+
+  // Otherwise, find the nearest timer
+  return timers.reduce((closest, timer) => {
+    const rect = timer.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const distance = Math.sqrt(
+      Math.pow(x - centerX, 2) +
+      Math.pow(y - centerY, 2)
+    );
+
+    if (distance < (closest.distance || Infinity)) {
+      return { element: timer, distance };
+    }
+    return closest;
+  }, {}).element;
+}
+
+
+// Update positions via API
+function updateTimerPositions() {
+  const timers = document.querySelectorAll(".timer-container");
+  const timerUpdates = Array.from(timers).map((timer, index) => ({
+    id: timer.dataset.id,
+    position: index + 1
+  }));
+
+  fetch("/api/update_timer_positions.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ timers: timerUpdates })
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (!data.success) console.error("Failed to update positions");
+    });
+}

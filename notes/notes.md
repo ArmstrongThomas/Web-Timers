@@ -50,6 +50,7 @@ CREATE TABLE timers (
     status ENUM('active', 'paused', 'completed') DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    position INT DEFAULT '0',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 

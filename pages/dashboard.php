@@ -119,13 +119,9 @@ echo "<div class='sound-settings collapsed'>
 // Fetch the timers for the current user.
 $timers = $timer->getTimersByUserId($session->getUserId());
 if (!empty($timers)) {
-    echo "<div class='timers-grid'>";
-    echo "</div>";
-    try {
-        echo "<script id='timers-data' type='application/json'>" . json_encode($timers, JSON_THROW_ON_ERROR) . "</script>";
-    } catch (JsonException $e) {
-        // Handle JSON error if necessary.
-    }
+    echo "<div class='timers-grid'></div>";
+    echo "<script id='user-id' type='application/json'>" . json_encode($session->getUserId()) . "</script>";
+    echo "<script id='timers-data' type='application/json'>" . json_encode($timers) . "</script>";
 }
 
 // Add sound settings JavaScript

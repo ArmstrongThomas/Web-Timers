@@ -19,7 +19,7 @@ HTML;
 function renderFooter(): void
 {
     echo <<<HTML
-    
+
     </div>
 </div>
 </body>

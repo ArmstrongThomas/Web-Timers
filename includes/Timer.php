@@ -32,7 +32,7 @@ class Timer
             $this->error = "Timer name must be between 1 and 255 characters.";
             return false;
         }
-        
+
         // Validate sound path
         if (empty($sound) || !preg_match('/^\/sounds\/[a-zA-Z0-9_\-\.]+\.(mp3|wav|ogg)$/i', $sound)) {
             $this->error = "Invalid sound selection.";
@@ -49,20 +49,25 @@ class Timer
             return false;
         }
 
+        $stmt = $this->conn->prepare("SELECT COALESCE(MAX(position), 0) + 1 AS next_position FROM timers WHERE user_id = ?");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        $next_position = $result['next_position'];
+
         $stmt = $this->conn->prepare("
-        INSERT INTO timers (user_id, name, length, remaining_time, start_time, end_time, sound, status)
-        VALUES (?, ?, ?, ?, NOW(), NOW() + INTERVAL ? SECOND, ?, 'active')
-    ");
-        // remaining_time is initially the same as length.
-        $stmt->bind_param("isiiis", $user_id, $name, $length, $length, $length, $sound);
-        if ($stmt->execute()) {
-            return true;
-        }
-        $this->error = "Failed to create timer. Please try again.";
-        return false;
+            INSERT INTO timers (user_id, name, length, remaining_time, start_time, end_time, sound, status, position)
+            VALUES (?, ?, ?, ?, NOW(), NOW() + INTERVAL ? SECOND, ?, 'active', ?)
+        ");
+        $stmt->bind_param("isiiisi", $user_id, $name, $length, $length, $length, $sound, $next_position);
+        return $stmt->execute();
     }
 
-
+    public function updateTimerPosition($timer_id, $new_position, $user_id): bool {
+        $stmt = $this->conn->prepare("UPDATE timers SET position = ? WHERE id = ? AND user_id = ?");
+        $stmt->bind_param("iii", $new_position, $timer_id, $user_id);
+        return $stmt->execute();
+    }
 
     /**
      * Pauses an active timer.
@@ -140,13 +145,17 @@ class Timer
      * Each timer is an associative array with the following keys: id, name, sound, length, remaining_time, start_time, end_time, paused_at, status.
      * If no timers are found, an empty array is returned.
      */
-    public function getTimersByUserId($user_id)
-    {
-        $stmt = $this->conn->prepare("SELECT id, name, sound, length, remaining_time, start_time, end_time, paused_at, status FROM timers WHERE user_id = ?");
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-    }
+     public function getTimersByUserId($user_id) {
+         $stmt = $this->conn->prepare("
+             SELECT id, name, sound, length, remaining_time, start_time, end_time, paused_at, status, position
+             FROM timers
+             WHERE user_id = ?
+             ORDER BY position ASC
+         ");
+         $stmt->bind_param("i", $user_id);
+         $stmt->execute();
+         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+     }
 
     /**
      * Retrieves information for a specific timer by its ID.

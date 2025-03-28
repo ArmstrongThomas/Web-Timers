@@ -62,14 +62,7 @@ body, html {
     display: none;
 }
 
-.timers-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    gap: 20px;
-}
+
 
 .timer-container {
     position: relative;
@@ -374,4 +367,44 @@ body, html {
 
 .create-timer-btn:hover {
     background-color: #0069d9;
+}
+
+
+
+.timer-container {
+  cursor: grab;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.timer-container:active {
+  cursor: grabbing;
+}
+
+.timer-container.dragging {
+  opacity: 0.8;
+  transform: scale(1.02);
+  transition: transform 0.1s, opacity 0.1s;
+  z-index: 100;
+}
+
+.timers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  align-items: start; /* Prevent vertical stretching */
+}
+
+.timer-container.drop-guide {
+  position: relative;
+}
+.timer-container.drop-guide::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 2px dashed rgba(0, 123, 255, 0.3);
+  pointer-events: none;
 }
