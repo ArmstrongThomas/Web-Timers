@@ -152,7 +152,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const soundOptions = document.getElementById('sound');
         const selectedSound = soundOptions.value;
         if (selectedSound) {
-            playTimerSound(selectedSound);
+            // Use 'preview' as a special timer ID for sound previews
+            playTimerSound(selectedSound, 'preview');
         }
     });
 

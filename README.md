@@ -63,7 +63,7 @@ A web application for creating and managing custom timers with notifications, de
 - Push notifications (browser/desktop).
 - Timer sounds continuing playing until dismissed.
 - Timer sharing/collaboration.
-
+- Schedule timers for a specific date and time.
 ---
 
 ## Setup Instructions
